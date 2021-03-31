@@ -9,9 +9,12 @@ import {EventList} from '../components/event.js'
 import {SkillList} from '../components/skill.js'
 import {BuffButton} from '../components/buff.js'
 
+
+
 import Race from './race.js'
 import Player from './player.js'
 import Support from './support.js'
+
 
 const {Column} = Table
 
@@ -178,10 +181,10 @@ const Nurturing = () =>{
 
 
   return(
-    <Row className='nurturing-box' gutter={[16,16]}>
+    <Row className='' gutter={[16,16]}>
       <Col sm={8} xs={24}>
-        <Button type={'primary'} onClick={showPlayer}>选择马娘</Button>
-        <Button onClick={showSupport2}>辅助卡查询</Button>
+        <Button className='add-player' type={'primary'} onClick={showPlayer}>选择马娘</Button>
+        <Button onClick={showSupport2}>支援卡查询</Button>
         <Button onClick={showRace}>选择关注赛事</Button>
         <Button onClick={showDrawer}>查看关注赛事</Button>
         <Popover width={'100%'} content={
@@ -209,45 +212,49 @@ const Nurturing = () =>{
         }><Button>卡组</Button></Popover>
         <BuffButton></BuffButton>
         <Divider style={{margin:'4px 0'}}></Divider>
-        <img src={player.id?cdnServer+player.imgUrl:null} width='20%' style={{float:'left'}}></img>
-        <EventList eventList={player.eventList} pid={player.id} type='multi'></EventList>
-        <RaceList raceList={player.id?player.raceList:[]}></RaceList>
-        <SkillList skillList={player.id?player.skillList:[]}></SkillList>
+        {player.id&&<>
+          <img src={cdnServer+player.imgUrl} width='20%'
+            style={{float:'left',marginRight:'8px'}}></img>
+          <EventList eventList={player.eventList} pid={player.id} type='multi'></EventList>
+          <RaceList raceList={player.raceList}></RaceList>
+          <Divider style={{margin:'4px 0'}}></Divider>
+          <SkillList skillList={player.skillList}></SkillList>
+        </>}
+
         <Drawer
-        title="关注赛事"
-        onClose={onDrawerClose}
-        visible={visible}
-        getContainer={false}
-        style={{ position: 'absolute' }}
-        closable={true}
-        placement="left"
-        mask={true}
-        maskClosable={true}
-        width={'95%'}
-      >
-        <Table dataSource={races} pagination={false}>
-          <Column title="名称" dataIndex="name" key="name" />
-          <Column title="时间" dataIndex="date" key="date" />
-          <Column title="级别" dataIndex="grade" key="grade" />
-          <Column title="类型" dataIndex="distanceType" key="distanceType" />
-        </Table>
-      </Drawer>
+          title="关注赛事"
+          onClose={onDrawerClose}
+          visible={visible}
+          getContainer={false}
+          style={{ position: 'absolute' }}
+          closable={true}
+          placement="left"
+          mask={true}
+          maskClosable={true}
+          width={'95%'}
+        >
+          <Table dataSource={races} pagination={false}>
+            <Column title="名称" dataIndex="name" key="name" />
+            <Column title="时间" dataIndex="date" key="date" />
+            <Column title="级别" dataIndex="grade" key="grade" />
+            <Column title="类型" dataIndex="distanceType" key="distanceType" />
+          </Table>
+        </Drawer>
 
       </Col>
 
       <Col sm={16} xs={24}>
-        <Row gutter={[16,16]}>
+        <Row gutter={[8,8]}>
         {[0,1,2,3,4,5].map(index=>
           <Col sm={8} xs={24} key={index} style={{}}>
             {supports[index]&&supports[index].id?
             <>
               <img src={cdnServer+supports[index].imgUrl} alt={supports[index].name} width={'100%'}
-               ></img>
+               className='nur-sup-img'></img>
               <div style={{position:'absolute',padding:'12px',
-                          top:'0',left:'0',
-                          width:'100%',height:'100%',
-                          overflow:'auto'}} className='support-card'>
-                <Tooltip title="选择辅助卡">
+                          top:'0',left:'4px',right:'4px',bottom:'0',
+                          overflow:'auto'}} className='gray-cover'>
+                <Tooltip title="选择支援卡">
                   <Button shape="circle" icon={<EditOutlined />} onClick={()=>showSupport(index)}/>
                 </Tooltip>
                 <EventList eventList={supports[index].eventList} pid={supports[index].id} type='multi'></EventList>
@@ -255,7 +262,7 @@ const Nurturing = () =>{
                 <SkillList skillList={[...new Set(supports[index].skillList)]} ></SkillList>
               </div>
             </>
-            :<Button onClick={()=>showSupport(index)}>选择辅助卡</Button>
+            :<Button onClick={()=>showSupport(index)}>选择支援卡</Button>
             }
           </Col>
         )}

@@ -15,9 +15,9 @@ const EventList = (props)=>{
   }
   return (
     <>
-    <Divider>多选</Divider>
+    <Divider style={{margin:'4px 0'}}>多选</Divider>
     {eventList.filter(event=>event.choiceList.length > 1).map(event=><EventBox key={event.id} event={event}></EventBox>)}
-    <Divider>单选</Divider>
+    <Divider style={{margin:'4px 0'}}>单选</Divider>
     {eventList.filter(event=>event.choiceList.length <= 1).map(event=><EventBox key={event.id} event={event}></EventBox>)}
     </>
   )
@@ -29,7 +29,10 @@ const EventBox = (props)=>{
       )
       return(
         <Row key={index} gutter={[8,8]} className="list-row">
-          <Col span={12}><p>{choice[0]}</p></Col>
+          <Col span={12}>
+            <p>{choice[0]}</p>
+            <p>{t(choice[0])}</p>
+          </Col>
           <Col span={12}>{ResultItem}</Col>
         </Row>
       )
@@ -39,7 +42,7 @@ const EventBox = (props)=>{
       <Popover content={<>
         <p>{t(props.event.name)}</p>
         {ChoiceItem}
-      </>} title={props.event.name}>
+      </>} title={props.event.name} placement={'bottom'}>
         <Button className='event-button'>{props.event.name}</Button>
       </Popover>
     )
