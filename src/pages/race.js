@@ -1,6 +1,6 @@
 import React,{useState} from 'react';
 import db from '../db.js'
-
+import t from '../components/t.js'
 import { Table } from 'antd';
 
  // { name: '葵ステークス',
@@ -65,26 +65,46 @@ import { Table } from 'antd';
   const labels = ["name", "date", "class", "grade",
                   "place", "ground", "distance",
                   "distanceType", "direction", "side"]
+  const labelTextDict ={name:t("名称"),date:t("时间"),class:t("年级"),grade:t("赛事等级"),place:t("地点"),ground:t("场地"),distance:t("长度"),distanceType:t("赛程"),direction:t("方向"),side:t("赛道")}
+  const getCorrespondingLabelText = (label)=>{
+      return labelTextDict[label]
+  }
   const mediumLabels = ["name", "date", "class","grade","ground","distanceType"]
   const getColumns = (labels)=>{
     return labels.map(label=> {
       if(filterList['class']){
         return {
-          title:label,
+          title:getCorrespondingLabelText(label),
           dataIndex:label,
           filters:filterList[label],
           onFilter: (value, record) => record[label] === value,
         }
       }else{
         return{
-          title:label,
+          title:getCorrespondingLabelText(label),
           dataIndex:label
         }
       }
     })
   }
 
+
+
   const Race = (props) =>{
+    const useViewport = () => {
+      // const [width, setWidth] = React.useState(window.innerWidth);
+      const [height,setHeight] = React.useState(window.innerHeight);
+      React.useEffect(() => {
+        const handleWindowResize = () => setHeight(window.innerHeight);
+        window.addEventListener("resize", handleWindowResize);
+        return () => window.removeEventListener("resize", handleWindowResize);
+      }, []);
+      console.log('currentWidth::',height);
+      return {height};
+    };
+
+    const dynamicTableHeight = useViewport().height -300;
+
     const allRaceList = db.get('races').value().map((race,index)=>{
                       race.key=index
                       return race
@@ -95,7 +115,16 @@ import { Table } from 'antd';
       columns = getColumns(mediumLabels)
     }
     const onSelectChange = (selectedRowKeys,selectedRows)=>{
-      props.onSelect(selectedRows)
+      let selected = {}
+      for(let race of selectedRows){
+        if(selected[race.dateNum]){
+          selected[race.dateNum].push(race.id)
+        }else{
+          selected[race.dateNum]=[race.id]
+        }
+      }
+      console.log(selected)
+      props.onSelect(selected)
       setSelectedRowKeys(selectedRowKeys)
     }
     const rowSelection = {
@@ -108,9 +137,11 @@ import { Table } from 'antd';
       setSelectedRowKeys([])
     }
     return(
+      <div>
       <Table rowSelection={props.onSelect?rowSelection:null} columns={columns}
-      dataSource={allRaceList} onChange={onChange} pagination={false}/>
+      dataSource={allRaceList} onChange={onChange} pagination={false} scroll={{y:dynamicTableHeight}}/>
+      </div>
       )
   }
 
-export  default Race
+export default Race
