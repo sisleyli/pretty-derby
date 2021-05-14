@@ -26,7 +26,7 @@ const options = {
     { label:t('追込'), value:'4' },
     { label:t('通用'), value:'-1' },
   ],
-  phase_random: [
+  phase: [
     { label:t('序盤'), value:'0' },
     { label:t('中盤'), value:'1' },
     { label:t('終盤'), value:'2' },
@@ -40,7 +40,7 @@ const options = {
   ],
   is_finalcorner:[
     { label:t('最終直線/コーナー'), value:'1' },
-  ],
+  ]
   // is_finalcorner==1&corner==0
 }
 const skillType={
@@ -118,7 +118,7 @@ const SkillDetail = (props)=>{
     <Row>
     {supportList.sort((a,b)=>b.rarity-a.rarity).map(support=>
         <Col span={4} key={support.id}>
-          <SupportCard data={support}></SupportCard>
+          <SupportCard data={support} onSelect={()=>null}></SupportCard>
         </Col>)
       }
     </Row>
@@ -126,7 +126,7 @@ const SkillDetail = (props)=>{
     <Row>
     {playerList.sort((a,b)=>b.rarity-a.rarity).map(player=>
         <Col span={4} key={player.id}>
-          <PlayerCard data={player}></PlayerCard>
+          <PlayerCard data={player} onSelect={()=>null}></PlayerCard>
         </Col>)
       }
     </Row>
@@ -160,7 +160,8 @@ const SkillButton = (props)=>{
   return <Popover visible={ua==='mo'?false:undefined}
     content={<SkillDetail skill={skill} isNur={props.isNur||false}></SkillDetail>}>
     <Button type={'primary'} className={'skill-btn skill-btn-'+skill.rarity}
-    style={props.usedInList?{...inListStyleOverride}:{}} onClick={()=>toSkillDetail(skill.id)}>
+    style={props.usedInList?{...inListStyleOverride}:{}}
+    onClick={()=>toSkillDetail(skill.id)}>
       <div style={props.usedInList?
         {display:'flex',position:'absolute',top:4,left:8,width:'100%'}:{width:'100%'}}>
       <Image src={cdnServer+skill.imgUrl} preview={false} width={26}></Image>
@@ -224,20 +225,26 @@ const SkillCheckbox = React.memo((props)=>{
     setSkillChecked2(checkedValues)
     updateSkillList(filteredSkills,skillChecked1,checkedValues,isOwn)
   }
-  const filteredSkills = React.useMemo(() => {
-    return Object.entries(checkboxGroupValues)
-      .reduce((l, [key, values]) =>
-        values.length > 0 ? (values.includes('-1') ? l.filter(skill => !skill.condition.includes(`${key}==`))
-          : l.filter(skill => {
+  const filteredSkills = React.useMemo(() => Object.entries(checkboxGroupValues)
+    .reduce((l, [key, values]) =>
+      values.length > 0
+        ? l.filter(skill => {
             switch(key) {
+              case 'phase':
+                return ['phase', 'phase_random'].map(
+                  _key => values.map(value => `${_key}==${value}`)
+                ).flat().some(phrase => skill.condition.includes(phrase));
+              case 'running_style':
+                return (values.map(value => `${key}==${value}`)
+                            .some(phrase => skill.condition.includes(phrase))) || (values.includes('-1') && !skill.condition.includes(`${key}==`));
               default:
                 return values.map(value => `${key}==${value}`)
-                              .some(phrase => skill.condition.includes(phrase));
+                            .some(phrase => skill.condition.includes(phrase));
             }
-          }))
+          })
         : l,
-      allSkillList)
-  }, [checkboxGroupValues, allSkillList])
+    allSkillList),
+  [checkboxGroupValues, allSkillList])
   useEffect(() => {
     updateSkillList(filteredSkills,skillChecked1,skillChecked2,isOwn)
   }, [filteredSkills]);
